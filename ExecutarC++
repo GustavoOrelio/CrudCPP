@@ -1,0 +1,7 @@
+Acessar a pasta que está o arquivo C++
+
+Rodar o seguinte comando:
+g++ -o Crud Crud.cpp
+
+E acessar o arquivo cpp
+./Crud
