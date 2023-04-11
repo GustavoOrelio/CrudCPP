@@ -34,9 +34,6 @@ void cadastrarCliente() {
     fclose(arquivo);
 }
 
-
-
-
 int main()
 {
 	FILE *arquivo = fopen("clientes.dat", "rb+");
