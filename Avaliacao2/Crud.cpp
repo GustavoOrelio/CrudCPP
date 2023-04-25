@@ -10,27 +10,37 @@ struct Cliente {
     int idTitular;
 };
 
+int maiorID = 0;
+
 int gerarID() {
-    FILE *file = fopen("clientes.bin", "rb");
-    if (file == nullptr) {
-        return 1;
-    }
 
-    Cliente cliente;
-    int maxID = 0;
-
-    while (fread(&cliente, sizeof(Cliente), 1, file)) {
-        if (cliente.id > maxID) {
-            maxID = cliente.id;
+    if (maiorID == 0) {
+        FILE *file = fopen("clientes.bin", "rb");
+        
+        if (file == nullptr) {
+            maiorID = 1;
+            return maiorID;
         }
-    }
 
-    fclose(file);
-    return maxID + 1;
+        Cliente cliente;
+
+        while (fread(&cliente, sizeof(Cliente), 1, file)) {
+            if (cliente.id > maiorID) {
+                maiorID = cliente.id;
+            }
+        }
+
+        fclose(file);
+    }
+    
+    maiorID++;
+    return maiorID;
 }
 
 bool titularTemDependentes(int id) {
+
     FILE *file = fopen("clientes.bin", "rb");
+
     if (file == nullptr) {
         return false;
     }
@@ -38,6 +48,7 @@ bool titularTemDependentes(int id) {
     Cliente cliente;
 
     while (fread(&cliente, sizeof(Cliente), 1, file)) {
+
         if (!cliente.titular && cliente.idTitular == id) {
             fclose(file);
             return true;
@@ -50,6 +61,7 @@ bool titularTemDependentes(int id) {
 
 bool validarCliente(int id) {
     FILE *file = fopen("clientes.bin", "rb");
+    
     if (file == nullptr) {
         return false;
     }
@@ -58,6 +70,7 @@ bool validarCliente(int id) {
     bool clienteValido = false;
 
     while (fread(&cliente, sizeof(Cliente), 1, file)) {
+    
         if (cliente.id == id && cliente.titular) {
             clienteValido = true;
             break;
@@ -80,11 +93,13 @@ void cadastrarCliente() {
     std::cin >> cliente.idade;
     std::cout << "O cliente é titular? (1 para sim, 0 para não): ";
     std::cin >> cliente.titular;
+    
     if (!cliente.titular) {
         std::cout << "Digite o ID do titular: ";
         std::cin >> cliente.idTitular;
-        if (!validarCliente(cliente.idTitular) || !titularTemDependentes(cliente.idTitular)) {
-            std::cout << "Titular inválido ou já possui dependentes." << std::endl;
+    
+        if (!validarCliente(cliente.idTitular)) {
+            std::cout << "Titular inválido." << std::endl;
             fclose(file);
             return;
         }
@@ -94,6 +109,7 @@ void cadastrarCliente() {
     fclose(file);
     std::cout << "Cliente cadastrado com sucesso!" << std::endl;
 }
+
 
 
 void excluirCliente() {
@@ -107,12 +123,14 @@ void excluirCliente() {
     }
 
     FILE *file = fopen("clientes.bin", "rb");
+    
     if (file == nullptr) {
         std::cout << "Erro ao abrir o arquivo." << std::endl;
         return;
     }
 
     FILE *tempFile = fopen("temp.bin", "wb");
+    
     if (tempFile == nullptr) {
         std::cout << "Erro ao criar arquivo temporário." << std::endl;
         fclose(file);
@@ -149,6 +167,7 @@ void modificarCliente() {
     std::cin >> id;
 
     FILE *file = fopen("clientes.bin", "rb+");
+    
     if (file == nullptr) {
         std::cout << "Erro ao abrir o arquivo." << std::endl;
         return;
@@ -158,6 +177,7 @@ void modificarCliente() {
     bool clienteEncontrado = false;
 
     while (fread(&cliente, sizeof(Cliente), 1, file) && !clienteEncontrado) {
+        
         if (cliente.id == id) {
             clienteEncontrado = true;
 
@@ -165,6 +185,7 @@ void modificarCliente() {
             std::cin.ignore();
             std::string novoNome;
             std::getline(std::cin, novoNome);
+           
             if (!novoNome.empty()) {
                 strncpy(cliente.nome, novoNome.c_str(), sizeof(cliente.nome));
                 cliente.nome[sizeof(cliente.nome) - 1] = '\0';
@@ -173,6 +194,7 @@ void modificarCliente() {
             std::cout << "Digite a nova idade do cliente (digite -1 para não alterar): ";
             int novaIdade;
             std::cin >> novaIdade;
+            
             if (novaIdade != -1) {
                 cliente.idade = novaIdade;
             }
@@ -191,7 +213,9 @@ void modificarCliente() {
 }
 
 void visualizarCliente() {
-        FILE *file = fopen("clientes.bin", "rb");
+        
+    FILE *file = fopen("clientes.bin", "rb");
+    
     if (file == nullptr) {
         std::cout << "Erro ao abrir o arquivo." << std::endl;
         return;
@@ -208,6 +232,7 @@ void visualizarCliente() {
         std::cout << "Nome: " << cliente.nome << std::endl;
         std::cout << "Idade: " << cliente.idade << std::endl;
         std::cout << "Titular: " << (cliente.titular ? "Sim" : "Não") << std::endl;
+        
         if (!cliente.titular) {
             std::cout << "ID do Titular: " << cliente.idTitular << std::endl;
         }
@@ -262,6 +287,6 @@ void menu() {
 
 int main() {
     menu();
-    return 0;
+    
 }
 
